@@ -1,0 +1,35 @@
+# ============================================================
+# application-dev.yml —— 本地开发环境配置
+# 团队成员按自己本地环境修改 host/port，不提交此文件至生产
+# ============================================================
+
+spring:
+
+  # ── MongoDB 本地地址（修改为你本机或 Docker 的 IP）──────────
+  data:
+    mongodb:
+      host: 127.0.0.1      # 本地 Docker / 安装版均可
+      port: 27017
+      # username: admin    # 若启用了认证，取消注释并填写
+      # password: secret
+      # authentication-database: admin
+
+    # ── Redis 本地地址 ─────────────────────────────────────────
+    redis:
+      host: 127.0.0.1      # Docker：docker-compose up -d redis
+      port: 6379
+      # password:          # 本地 Redis 一般无密码；有则填写
+      database: 0
+
+# ── 本地服务端口（避免与其他服务冲突可改为 8088 等）──────────
+server:
+  port: 8080
+
+# ── 本地开发日志级别调高，便于调试 ───────────────────────────
+logging:
+  level:
+    root: INFO
+    com.distributed: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.redis: DEBUG
+    org.apache.cxf: INFO

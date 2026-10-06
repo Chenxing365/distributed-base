@@ -1,0 +1,72 @@
+# ============================================================
+# application.yml —— 生产/公共基础配置
+# 敏感的本地差异配置（IP、端口）放在 application-dev.yml
+# ============================================================
+
+spring:
+  application:
+    name: distributed-base
+
+  # 激活的环境 Profile（由 Maven Profile 或启动参数注入）
+  profiles:
+    active: "@spring.profiles.active@"
+
+  # ── Jackson 全局序列化 ──────────────────────────────────────
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # ── MongoDB 公共配置（生产环境覆盖 host/port）───────────────
+  data:
+    mongodb:
+      database: distributed_base
+      auto-index-creation: true            # 自动创建 @Indexed 声明的索引
+
+    # ── Redis 公共配置 ─────────────────────────────────────────
+    redis:
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 2
+          max-wait: 2000ms
+
+# ── 服务器 ────────────────────────────────────────────────────
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+
+# ── Apache CXF WebService ─────────────────────────────────────
+cxf:
+  path: /ws                                # SOAP 端点根路径：http://host:8080/ws
+  servlet:
+    load-on-startup: 1
+
+# ── SpringDoc / Swagger UI ────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+
+# ── 日志 ─────────────────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.distributed: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.apache.cxf: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

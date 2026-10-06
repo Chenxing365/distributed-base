@@ -1,0 +1,44 @@
+# ── Java / Maven ──────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ── IDE ───────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.eclipse/
+.settings/
+.project
+.classpath
+*.vscode/
+.DS_Store
+Thumbs.db
+
+# ── Node / 前端 ───────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+frontend/dist-mp-weixin/
+frontend/.hbuilderx/
+
+# ── 本地开发配置（含敏感 IP / 密码，不提交）────────────────
+# 若团队统一使用 Docker，可选择提交 application-dev.yml 模板
+# backend/src/main/resources/application-dev.yml
+
+# ── Docker 数据卷（本地生成）─────────────────────────────────
+mongo-data/
+redis-data/
+nginx-logs/
+
+# ── 系统文件 ─────────────────────────────────────────────────
+*.swp
+*.swo
+*~

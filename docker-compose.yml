@@ -1,0 +1,110 @@
+# =================================================================
+# docker-compose.yml — 本地开发基础设施一键编排
+#
+# 包含服务：
+#   - mongodb   : MongoDB 7.x（持久化数据卷）
+#   - redis     : Redis 7.x（AOF 持久化）
+#   - nginx     : Nginx 1.25+（反向代理 / 负载均衡网关）
+#
+# 使用：
+#   docker compose up -d          # 一键启动
+#   docker compose down           # 停止并移除容器（数据卷保留）
+#   docker compose down -v        # 停止并删除所有数据卷（谨慎！）
+#   docker compose logs -f redis  # 查看单服务日志
+#
+# 注意：Spring Boot 应用本身不在此 Compose 中（本地 IDE 直接运行）
+#       如需容器化后端，请参考 README.md 中的扩展说明
+# =================================================================
+
+version: "3.9"
+
+# ── 网络：所有服务共用同一内部网络 ──────────────────────────────
+networks:
+  dev-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ── 数据卷：持久化存储 ───────────────────────────────────────────
+volumes:
+  mongo-data:
+    driver: local
+  redis-data:
+    driver: local
+  nginx-logs:
+    driver: local
+
+services:
+
+  # ── MongoDB 7.x ────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: dev-mongodb
+    restart: unless-stopped
+    networks:
+      - dev-net
+    ports:
+      - "27017:27017"        # 宿主机端口 → 容器端口
+    environment:
+      # 生产环境请修改默认密码并启用认证
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: dev_password_change_me
+      MONGO_INITDB_DATABASE: distributed_base
+    volumes:
+      - mongo-data:/data/db                         # 数据持久化
+      - mongo-data:/data/configdb                   # 配置持久化
+      - ./mongo-init/init.js:/docker-entrypoint-initdb.d/init.js:ro  # 初始化脚本（可选）
+    command:
+      - "--wiredTigerCacheSizeGB"
+      - "1"                   # 本地开发限制内存占用，生产按需调整
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Redis 7.x ──────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: dev-redis
+    restart: unless-stopped
+    networks:
+      - dev-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ── Nginx 1.25+ ────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: dev-nginx
+    restart: unless-stopped
+    networks:
+      - dev-net
+    ports:
+      - "80:80"
+      - "443:443"              # 预留 HTTPS 端口（本地开发暂不配置证书）
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro        # 主配置
+      - ./frontend/dist:/usr/share/nginx/html:ro           # H5 构建产物
+      - nginx-logs:/var/log/nginx                           # 日志持久化
+    depends_on:
+      - mongodb
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

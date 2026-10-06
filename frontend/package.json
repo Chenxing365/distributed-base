@@ -1,0 +1,35 @@
+{
+  "name": "distributed-base-frontend",
+  "version": "1.0.0",
+  "description": "分布式基础工程前端 — UniApp + Vue3 + Vite + TypeScript，支持 H5 与微信小程序双端",
+  "scripts": {
+    "dev:h5":       "uni",
+    "dev:mp-weixin": "uni --platform mp-weixin",
+    "build:h5":     "uni build",
+    "build:mp-weixin": "uni build --platform mp-weixin",
+    "type-check":   "vue-tsc --noEmit",
+    "lint":         "eslint src --ext .ts,.vue --fix"
+  },
+  "engines": {
+    "node": ">=18.0.0 <23.0.0",
+    "npm":  ">=8.0.0"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app":        "3.0.0-4010120240930001",
+    "@dcloudio/uni-components":  "3.0.0-4010120240930001",
+    "@dcloudio/uni-h5":          "3.0.0-4010120240930001",
+    "@dcloudio/uni-mp-weixin":   "3.0.0-4010120240930001",
+    "vue":                       "^3.4.21",
+    "pinia":                     "^2.1.7"
+  },
+  "devDependencies": {
+    "@dcloudio/types":           "^3.4.8",
+    "@dcloudio/uni-cli-shared":  "3.0.0-4010120240930001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-4010120240930001",
+    "@types/node":               "^20.14.0",
+    "@vitejs/plugin-vue":        "^5.0.4",
+    "typescript":                "^5.4.5",
+    "vite":                      "^5.2.8",
+    "vue-tsc":                   "^2.0.16"
+  }
+}
